@@ -8,16 +8,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gradio_pdf"
-version = "0.0.3"
-description = "Python library for easily interacting with trained machine learning models"
+version = "0.0.4"
+description = "Easily display PDFs in Gradio"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.8"
-authors = [{ name = "YOUR NAME", email = "YOUREMAIL@domain.com" }]
+authors = [{ name = "Freddy Boulton", email = "alfonsoboulton@gmail.com" }]
 keywords = [
-  "machine learning",
-  "reproducibility",
-  "visualization",
+  "Documents",
+  "PDF",
+  "Document QA",
   "gradio",
   "gradio custom component",
   "gradio-template-Fallback"
@@ -42,8 +42,12 @@ classifiers = [
 [project.optional-dependencies]
 dev = ["build", "twine"]
 
+[project.urls]
+repository = "https://github.com/freddyaboulton/gradio-pdf"
+space = "https://huggingface.co/spaces/freddyaboulton/gradio_pdf"
+
 [tool.hatch.build]
-artifacts = ["/backend/gradio_pdf/templates", "*.pyi", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates", "Users/freddy/miniconda3/envs/blank/lib/python3.10/site-packages/gradio_pdf/templates", "Users/freddy/miniconda3/envs/blank/lib/python3.10/site-packages/gradio_pdf/templates", "Users/freddy/miniconda3/envs/blank/lib/python3.10/site-packages/gradio_pdf/templates", "backend/gradio_pdf/templates"]
+artifacts = ["/backend/gradio_pdf/templates", "*.pyi", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["/backend/gradio_pdf"]

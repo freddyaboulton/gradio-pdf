@@ -42,8 +42,6 @@
 	class:selected
 	style="justify-content: center; align-items: center; display: flex; flex-direction: column;"
 >
-	<span>Foo</span>
-
 	<canvas bind:this={canvasRef}></canvas>
 </div>
 

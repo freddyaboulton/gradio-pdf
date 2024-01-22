@@ -122,7 +122,7 @@
 			show_label={label !== null}
 			Icon={File}
 			float={value === null}
-			label={"Foo" || "File"}
+			label={label || "File"}
 		/>
 		{#if _value}
 			<ModifyUpload i18n={gradio.i18n} on:clear={handle_clear} absolute />
