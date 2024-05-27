@@ -5,7 +5,9 @@ from gradio.components.base import Component
 from gradio.data_classes import FileData
 from gradio import processing_utils
 
+
 class PDF(Component):
+    """PDF COMPONENT"""
 
     EVENTS = ["change", "upload"]
 

@@ -10,7 +10,7 @@
 		import type { FileData } from "@gradio/client";
 		import { normalise_file } from "@gradio/client";
 		import { Upload, ModifyUpload } from "@gradio/upload";
-		import pdfjsLib from "pdfjs-dist";
+		import * as pdfjsLib from 'pdfjs-dist';
 
 		export let elem_id = "";
 		export let elem_classes: string[] = [];
