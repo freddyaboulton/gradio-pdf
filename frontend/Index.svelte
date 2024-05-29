@@ -20,6 +20,7 @@
 		export let scale: number | null = null;
 		export let root: string;
 		export let height: number | null = 500;
+        export let starting_page: int;
 		export let label: string;
 		export let proxy_url: string;
 		export let min_width: number | undefined = undefined;
@@ -35,7 +36,7 @@
 		let old_value = _value;
 		let pdfDoc;
 		let numPages = 1;
-		let currentPage = 1;
+		let currentPage = starting_page;
 		let canvasRef;
 
 		async function handle_clear() {
