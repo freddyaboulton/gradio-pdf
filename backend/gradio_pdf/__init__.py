@@ -1,4 +1,3 @@
-
 from .pdf import PDF
 
-__all__ = ['PDF']
+__all__ = ["PDF"]
