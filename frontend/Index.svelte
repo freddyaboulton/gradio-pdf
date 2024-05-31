@@ -39,6 +39,7 @@
 		let canvasRef;
 
 		$: currentPage = Math.min(Math.max(starting_page, 1), numPages);
+		$: console.log("currentPage", currentPage);
 
 		async function handle_clear() {
 			_value = null;
@@ -58,11 +59,13 @@
 			const loadingTask = pdfjsLib.getDocument(value.url);
 			pdfDoc = await loadingTask.promise;
 			numPages = pdfDoc.numPages;
-			render_page();
+			currentPage = Math.min(Math.max(starting_page, 1), numPages)
+			render_page(currentPage);
 		}
 
-		function render_page() {
+		function render_page(currentPage) {
 		// Render a specific page of the PDF onto the canvas
+			console.log("current Page here", currentPage);
 			pdfDoc.getPage(currentPage).then(page => {
 				const ctx  = canvasRef.getContext('2d')
 				ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
@@ -85,7 +88,7 @@
 				return;
 			}
 			currentPage++;
-			render_page();
+			render_page(currentPage);
 		}
 
 		function prev_page() {
@@ -93,7 +96,7 @@
 				return;
 			}
 			currentPage--;
-			render_page();
+			render_page(currentPage);
 		}
 
 		$: height = height || 500;
