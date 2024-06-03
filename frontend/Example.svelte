@@ -3,8 +3,8 @@
 	export let samples_dir: string;
 	export let type: "gallery" | "table";
 	export let selected = false;
-	import pdfjsLib from "pdfjs-dist";
-	pdfjsLib.GlobalWorkerOptions.workerSrc =  "https://cdn.bootcss.com/pdf.js/3.11.174/pdf.worker.js";
+	import * as pdfjsLib from 'pdfjs-dist';
+	pdfjsLib.GlobalWorkerOptions.workerSrc =  "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
 	
 	let pdfDoc;
 	let canvasRef;

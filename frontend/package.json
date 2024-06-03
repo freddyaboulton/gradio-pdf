@@ -13,17 +13,16 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "pdfjs-dist": "3.11.174",
     "@gradio/preview": "0.9.0"
   },
   "dependencies": {
     "@gradio/atoms": "0.2.0",
     "@gradio/statustracker": "0.3.0",
     "@gradio/utils": "0.2.0",
-    "@gradio/client": "0.7.1",
+    "@gradio/client": "0.20.1",
     "@gradio/upload": "0.3.2",
     "@gradio/icons": "0.2.0",
     "@gradio/button": "0.2.3",
-    "pdfjs-dist": "3.11.174"
+    "pdfjs-dist": "4.2.67"
   }
 }

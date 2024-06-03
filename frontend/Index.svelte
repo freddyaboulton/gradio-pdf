@@ -8,7 +8,6 @@
 		import { StatusTracker } from "@gradio/statustracker";
 		import type { LoadingStatus } from "@gradio/statustracker";
 		import type { FileData } from "@gradio/client";
-		import { normalise_file } from "@gradio/client";
 		import { Upload, ModifyUpload } from "@gradio/upload";
 		import * as pdfjsLib from 'pdfjs-dist';
 
@@ -30,8 +29,9 @@
 			upload: never;
 		}>;
 
-		pdfjsLib.GlobalWorkerOptions.workerSrc =  "https://cdn.bootcss.com/pdf.js/3.11.174/pdf.worker.js";
 
+		pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
+		
 		let _value = value;
 		let old_value = _value;
 		let pdfDoc;
@@ -39,7 +39,6 @@
 		let canvasRef;
 
 		$: currentPage = Math.min(Math.max(starting_page, 1), numPages);
-		$: console.log("currentPage", currentPage);
 
 		async function handle_clear() {
 			_value = null;
@@ -65,7 +64,6 @@
 
 		function render_page(currentPage) {
 		// Render a specific page of the PDF onto the canvas
-			console.log("current Page here", currentPage);
 			pdfDoc.getPage(currentPage).then(page => {
 				const ctx  = canvasRef.getContext('2d')
 				ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
@@ -100,6 +98,10 @@
 		}
 
 		$: height = height || 500;
+
+		function normalise_file(value, root, proxy_url) {
+			return value
+		}
 		
 		// Compute the url to fetch the file from the backend\
 		// whenever a new value is passed in.
