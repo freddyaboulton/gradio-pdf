@@ -53,7 +53,10 @@ class PDF(Component):
         self.starting_page = starting_page
 
     def preprocess(self, payload: FileData) -> str:
-        return payload.path
+        if payload:
+          return payload.path
+        else:
+          return None
 
     def postprocess(self, value: str | None) -> FileData | None:
         if not value:
