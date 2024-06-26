@@ -43,8 +43,12 @@ Easily display PDFs in Gradio
 """, elem_classes=["md-custom"], header_links=True)
     app.render()
     gr.Markdown(
+
 """
+
+```
 ## Installation
+
 
 ```bash
 pip install gradio_pdf
