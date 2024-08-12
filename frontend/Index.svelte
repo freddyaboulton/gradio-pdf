@@ -18,7 +18,7 @@
 		export let container = true;
 		export let scale: number | null = null;
 		export let root: string;
-		export let height: number | null = 500;
+		export let height: number | null = null;
         export let starting_page: number;
 		export let label: string;
 		export let proxy_url: string;
@@ -68,9 +68,10 @@
 				const ctx  = canvasRef.getContext('2d')
 				ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
 				let viewport = page.getViewport({ scale: 1 });
-				let scale = height / viewport.height;
-				viewport = page.getViewport({ scale: scale });
-
+				console.log("height", height)
+				if (height) {
+					viewport = page.getViewport({ scale: height / viewport.height });
+				}
 				const renderContext = {
 					canvasContext: ctx,
 					viewport,
@@ -96,8 +97,6 @@
 			currentPage--;
 			render_page(currentPage);
 		}
-
-		$: height = height || 500;
 
 		function normalise_file(value, root, proxy_url) {
 			return value
@@ -133,7 +132,7 @@
 		/>
 		{#if _value}
 			<ModifyUpload i18n={gradio.i18n} on:clear={handle_clear} absolute />
-			<div class="pdf-canvas" style="height: {height}px">
+			<div class="pdf-canvas">
 				<canvas bind:this={canvasRef}></canvas>
 			</div>
 			<div class="button-row">
