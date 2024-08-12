@@ -32,8 +32,8 @@
 
 		pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
 		
-		let _value = value;
-		let old_value = _value;
+		let _value;
+		let old_value;
 		let pdfDoc;
 		let numPages = 1;
 		let canvasRef;
