@@ -28,6 +28,7 @@
 			change: never;
 			upload: never;
 		}>;
+		export let max_file_size: float | null;
 
 
 		pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
@@ -98,6 +99,12 @@
 			render_page(currentPage);
 		}
 
+		function handle_page_change() {
+			if(currentPage < 1) return;
+			if(currentPage > numPages) return;
+			render_page(currentPage)
+		}
+
 		function normalise_file(value, root, proxy_url) {
 			return value
 		}
@@ -139,7 +146,11 @@
 				<BaseButton on:click={prev_page}>
 					⬅️
 				</BaseButton>
-				<span class="page-count"> {currentPage} / {numPages} </span>
+				<div class="page-count">
+					<input type="number" bind:value={currentPage} on:change={handle_page_change} min={1} max={numPages}  />
+					<span style="width: var(--size-6)"> / </span> 
+					<span style="width: var(--size-6)">{numPages}</span>
+				</div>
 				<BaseButton on:click={next_page}>
 					➡️
 				</BaseButton>
@@ -173,8 +184,43 @@
 	}
 
 	.page-count {
-		margin: 0 10px;
 		font-family: var(--font-mono);
+		display: flex;
+		flex-direction: row;
+		justify-content: space-evenly !important;
+		align-items: center;
+	}
+
+	input[type="number"] {
+		outline: none !important;
+		/* box-shadow: var(--input-shadow);
+		border: var(--input-border-width) solid var(--input-border-color);
+		border-radius: var(--input-radius);
+		background: var(--input-background-fill);
+		height: var(--size-6);
+		width: var(--size-12); */
+		width: var(--size-14);
+		border: none;
+		background: var(--input-background-fill);
+		color: var(--body-text-color);
+		font-size: var(--input-text-size);
+		line-height: var(--line-sm);
+		text-align: center;
+	}
+
+	input:disabled {
+		-webkit-text-fill-color: var(--body-text-color);
+		-webkit-opacity: 1;
+		opacity: 1;
+	}
+
+	input[type="number"]:focus {
+		box-shadow: var(--input-shadow-focus);
+		border-color: var(--input-border-color-focus);
+	}
+
+	input::placeholder {
+		color: var(--input-placeholder-color);
 	}
 
 </style>
