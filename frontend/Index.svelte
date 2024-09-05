@@ -27,9 +27,8 @@
 		export let gradio: Gradio<{
 			change: never;
 			upload: never;
+			clear_status: never;
 		}>;
-		export let max_file_size: float | null;
-
 
 		pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
 		
@@ -129,6 +128,7 @@
 				autoscroll={gradio.autoscroll}
 				i18n={gradio.i18n}
 				{...loading_status}
+				on:clear_status={() => gradio.dispatch("clear_status", loading_status)}
 			/>
 		{/if}
 		<BlockLabel
@@ -158,9 +158,17 @@
 		{:else}
 			<Upload
 				on:load={handle_upload}
-				filetype={"application/pdf"}
+				on:error={({ detail }) => {
+					loading_status = loading_status || {};
+					loading_status.status = "error";
+					gradio.dispatch("error", detail);
+				}}
+				filetype={".pdf"}
 				file_count="single"
 				{root}
+				max_file_size={gradio.max_file_size}
+				upload={gradio.client.upload}
+				stream_handler={gradio.client.stream}
 			>
 				<PdfUploadText/>
 			</Upload>

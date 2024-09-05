@@ -17,12 +17,12 @@
   },
   "dependencies": {
     "@gradio/atoms": "0.2.0",
-    "@gradio/statustracker": "0.3.0",
-    "@gradio/utils": "0.2.0",
-    "@gradio/client": "0.20.1",
-    "@gradio/upload": "0.3.2",
-    "@gradio/icons": "0.2.0",
     "@gradio/button": "0.2.3",
+    "@gradio/client": "0.20.1",
+    "@gradio/icons": "0.2.0",
+    "@gradio/statustracker": "^0.7.5",
+    "@gradio/upload": "^0.12.3",
+    "@gradio/utils": "^0.6.0",
     "pdfjs-dist": "4.2.67"
   }
 }
