@@ -104,6 +104,10 @@
 			render_page(currentPage)
 		}
 
+		function num_digits(x) {
+  			return (Math.log10((x ^ (x >> 31)) - (x >> 31)) | 0) + 1;
+		}
+
 		function normalise_file(value, root, proxy_url) {
 			return value
 		}
@@ -147,9 +151,9 @@
 					⬅️
 				</BaseButton>
 				<div class="page-count">
-					<input type="number" bind:value={currentPage} on:change={handle_page_change} min={1} max={numPages}  />
-					<span style="width: var(--size-6)"> / </span> 
-					<span style="width: var(--size-6)">{numPages}</span>
+					<input type="number" style={`width: ${50 + num_digits(numPages) * 10}px`} bind:value={currentPage} on:change={handle_page_change} min={1} max={numPages}  />
+					<span style="padding: var(--size-1)"> / </span> 
+					<span style="padding-right: var(--size-2); width: fit-content">{numPages}</span>
 				</div>
 				<BaseButton on:click={next_page}>
 					➡️
@@ -201,13 +205,6 @@
 
 	input[type="number"] {
 		outline: none !important;
-		/* box-shadow: var(--input-shadow);
-		border: var(--input-border-width) solid var(--input-border-color);
-		border-radius: var(--input-radius);
-		background: var(--input-background-fill);
-		height: var(--size-6);
-		width: var(--size-12); */
-		width: var(--size-14);
 		border: none;
 		background: var(--input-background-fill);
 		color: var(--body-text-color);
