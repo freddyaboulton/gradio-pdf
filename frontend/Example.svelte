@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let value: string;
+	export let value: object;
 	export let samples_dir: string;
 	export let type: "gallery" | "table";
 	export let selected = false;
@@ -33,7 +33,7 @@
 			});
 		}
 	
-	$: get_doc(samples_dir + value);
+	$: get_doc(value.url);
 </script>
 
 <div
