@@ -20,14 +20,14 @@
     "@gradio/preview": "0.12.0"
   },
   "dependencies": {
-    "@gradio/atoms": "0.9.0",
-    "@gradio/button": "0.3.0",
-    "@gradio/client": "1.6.0",
+    "@gradio/atoms": "0.9.2",
+    "@gradio/button": "0.3.3",
+    "@gradio/client": "1.7.0",
     "@gradio/icons": "0.8.0",
-    "@gradio/markdown": "^0.10.0",
-    "@gradio/statustracker": "^0.8.0",
-    "@gradio/upload": "^0.13.0",
+    "@gradio/markdown": "^0.10.3",
+    "@gradio/statustracker": "^0.9.1",
+    "@gradio/upload": "^0.13.3",
     "@gradio/utils": "^0.7.0",
-    "pdfjs-dist": "4.2.67"
+    "pdfjs-dist": "4.7.76"
   }
 }
