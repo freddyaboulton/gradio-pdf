@@ -32,8 +32,10 @@
 				page.render(renderContext);
 			});
 		}
-	
-	$: get_doc(value.url);
+
+	$: url = value.url;
+
+	$: get_doc(url);
 </script>
 
 <div
