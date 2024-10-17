@@ -28,6 +28,6 @@
     "@gradio/statustracker": "^0.9.1",
     "@gradio/upload": "^0.13.3",
     "@gradio/utils": "^0.7.0",
-    "pdfjs-dist": "4.7.76"
+    "pdfjs-dist": "4.2.67"
   }
 }
