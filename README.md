@@ -1,6 +1,10 @@
 
-# `gradio_pdf`
-<a href="https://pypi.org/project/gradio_pdf/" target="_blank"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/gradio_pdf"></a> <a href="https://github.com/freddyaboulton/gradio-pdf/issues" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Issues-white?logo=github&logoColor=black"></a> <a href="https://huggingface.co/spaces/freddyaboulton/gradio_pdf/discussions" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/%F0%9F%A4%97%20Discuss-%23097EFF?style=flat&logoColor=black"></a>
+<h1 style='text-align: center; margin-bottom: 1rem'> Gradio PDF 📕 </h1>
+
+<div style="display: flex; flex-direction: row; justify-content: center">
+<img style="display: block; padding-right: 5px; height: 20px;" alt="Static Badge" src="https://img.shields.io/pypi/v/gradio_pdf"> 
+<a href="https://github.com/freddyaboulton/gradio-pdf" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/github-white?logo=github&logoColor=black"></a>
+</div>
 
 Easily display PDFs in Gradio
 

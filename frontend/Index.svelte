@@ -41,7 +41,7 @@
 		$: currentPage = Math.min(Math.max(starting_page, 1), numPages);
 
 		async function handle_clear() {
-			_value = null;
+			value = null;
 			await tick();
 			gradio.dispatch("change");
 		}
