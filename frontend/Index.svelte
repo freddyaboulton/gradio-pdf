@@ -2,7 +2,7 @@
 		import { tick } from "svelte";
 		import PdfUploadText from "./PdfUploadText.svelte";
 		import type { Gradio } from "@gradio/utils";
-		import { Block, BlockLabel } from "@gradio/atoms";
+		import { Block, BlockLabel, Empty } from "@gradio/atoms";
 		import { BaseButton } from "@gradio/button";
 		import { File } from "@gradio/icons";
 		import { StatusTracker } from "@gradio/statustracker";
@@ -11,6 +11,7 @@
 		import { Upload, ModifyUpload } from "@gradio/upload";
 		import * as pdfjsLib from 'pdfjs-dist';
 
+		export let interactive: boolean;
 		export let elem_id = "";
 		export let elem_classes: string[] = [];
 		export let visible = true;
@@ -49,7 +50,6 @@
 		async function handle_upload({detail}: CustomEvent<FileData>): Promise<void> {
 			value = detail;
 			await tick();
-			gradio.dispatch("change");
 			gradio.dispatch("upload");
 		}
 
@@ -142,7 +142,7 @@
 			label={label || "File"}
 		/>
 		{#if _value}
-			<ModifyUpload i18n={gradio.i18n} on:clear={handle_clear} absolute />
+			<ModifyUpload i18n={gradio.i18n} on:clear={handle_clear} />
 			<div class="pdf-canvas">
 				<canvas bind:this={canvasRef}></canvas>
 			</div>
@@ -159,7 +159,7 @@
 					➡️
 				</BaseButton>
 			</div>
-		{:else}
+		{:else if interactive}
 			<Upload
 				on:load={handle_upload}
 				on:error={({ detail }) => {
@@ -176,6 +176,8 @@
 			>
 				<PdfUploadText/>
 			</Upload>
+		{:else}
+			<Empty unpadded_box={true} size="large"><File /></Empty>
 		{/if}
 	</Block>
 
