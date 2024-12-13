@@ -55,7 +55,11 @@
 
 
 		async function get_doc(value: FileData) {
-			const loadingTask = pdfjsLib.getDocument(value.url);
+			const loadingTask = pdfjsLib.getDocument({
+				url: value.url,
+				cMapUrl: "https://huggingface.co/datasets/freddyaboulton/bucket/resolve/main/cmaps/",
+				cMapPacked: true,
+			});
 			pdfDoc = await loadingTask.promise;
 			numPages = pdfDoc.numPages;
 			currentPage = Math.min(Math.max(starting_page, 1), numPages)
