@@ -40,6 +40,7 @@
 		let canvasRef;
 
 		$: currentPage = Math.min(Math.max(starting_page, 1), numPages);
+		$: render_page(currentPage);
 
 		async function handle_clear() {
 			value = null;
@@ -67,12 +68,12 @@
 		}
 
 		function render_page(currentPage) {
-		// Render a specific page of the PDF onto the canvas
+			if(!pdfDoc) return;
+			// Render a specific page of the PDF onto the canvas
 			pdfDoc.getPage(currentPage).then(page => {
 				const ctx  = canvasRef.getContext('2d')
 				ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
 				let viewport = page.getViewport({ scale: 1 });
-				console.log("height", height)
 				if (height) {
 					viewport = page.getViewport({ scale: height / viewport.height });
 				}
@@ -91,7 +92,6 @@
 				return;
 			}
 			currentPage++;
-			render_page(currentPage);
 		}
 
 		function prev_page() {
@@ -99,13 +99,11 @@
 				return;
 			}
 			currentPage--;
-			render_page(currentPage);
 		}
 
 		function handle_page_change() {
 			if(currentPage < 1) return;
 			if(currentPage > numPages) return;
-			render_page(currentPage)
 		}
 
 		function num_digits(x) {
