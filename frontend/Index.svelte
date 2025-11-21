@@ -58,7 +58,7 @@
 		async function get_doc(value: FileData) {
 			const loadingTask = pdfjsLib.getDocument({
 				url: value.url,
-				cMapUrl: "https://huggingface.co/datasets/freddyaboulton/bucket/resolve/main/cmaps/",
+				cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/cmaps/",
 				cMapPacked: true,
 			});
 			pdfDoc = await loadingTask.promise;
