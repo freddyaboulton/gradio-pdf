@@ -11,7 +11,6 @@
 	import * as pdfjsLib from 'pdfjs-dist';
 
 	const _props = $props();
-	// $inspect("_props", _props);
 	const gradio = new Gradio(_props);
 
 	pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
