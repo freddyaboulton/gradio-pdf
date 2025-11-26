@@ -11,7 +11,6 @@
 	import * as pdfjsLib from 'pdfjs-dist';
 
 	const _props = $props();
-	// $inspect("_props", _props);
 	const gradio = new Gradio(_props);
 
 	pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
@@ -162,9 +161,10 @@
 			}}
 			filetype={".pdf"}
 			file_count="single"
-			max_file_size={gradio.max_file_size}
-			upload={gradio.client.upload}
-			stream_handler={gradio.client.stream}
+			max_file_size={gradio.shared.max_file_size}
+			upload={(...args) => gradio.shared.client.upload(...args)}
+			stream_handler={gradio.shared.client?.stream}
+			root={gradio.shared.root}
 		>
 			<PdfUploadText/>
 		</Upload>

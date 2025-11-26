@@ -8,11 +8,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gradio_pdf"
-version = "0.0.23"
+version = "0.0.24"
 description = "Easily display PDFs in Gradio"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [{ name = "Freddy Boulton", email = "alfonsoboulton@gmail.com" }]
 keywords = [
   "Documents",
