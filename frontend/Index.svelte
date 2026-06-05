@@ -2,118 +2,203 @@
 	import { tick } from "svelte";
 	import PdfUploadText from "./PdfUploadText.svelte";
 	import { Gradio } from "@gradio/utils";
-	import { Block, BlockLabel, Empty} from "@gradio/atoms";
+	import type { SharedProps } from "@gradio/utils";
+	import { Block, BlockLabel, Empty } from "@gradio/atoms";
 	import { BaseButton } from "@gradio/button";
 	import { File } from "@gradio/icons";
 	import { StatusTracker } from "@gradio/statustracker";
 	import type { FileData } from "@gradio/client";
 	import { Upload, ModifyUpload } from "@gradio/upload";
-	import * as pdfjsLib from 'pdfjs-dist';
+	import * as pdfjsLib from "pdfjs-dist";
 
-	const _props = $props();
-	// $inspect("_props", _props);
-	const gradio = new Gradio(_props);
+	interface PDFProps {
+		value: FileData | null;
+		height: number | null;
+		starting_page: number;
+	}
 
-	pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
+	interface PDFEvents {
+		change: never;
+		upload: never;
+		clear_status: never;
+		error: string;
+	}
 
-	let old_value = $state(gradio.props.value);
-	let pdfDoc;
+	let _props: { shared_props: SharedProps; props: PDFProps } = $props();
+	const gradio = new Gradio<PDFEvents, PDFProps>(_props);
+
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+		"https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
+
+	let pdfDoc = $state<pdfjsLib.PDFDocumentProxy | null>(null);
 	let numPages = $state(1);
-	let canvasRef;
+	let canvasRef = $state<HTMLCanvasElement | null>(null);
+	let currentPage = $state(1);
+	let old_value = $state(gradio.props.value);
+	let value_watcher_ready = false;
+	let renderTask: pdfjsLib.RenderTask | null = null;
 
-	let currentPage = $derived(Math.min(Math.max(gradio.props.starting_page, 1), numPages))
+	let _value = $derived(gradio.props.value);
 
+	$effect(() => {
+		if (JSON.stringify(old_value) !== JSON.stringify(_value)) {
+			if (_value) {
+				get_doc(_value);
+			} else {
+				pdfDoc = null;
+			}
+			old_value = _value;
+			if (value_watcher_ready) {
+				gradio.dispatch("change");
+			} else {
+				value_watcher_ready = true;
+			}
+		}
+	});
 
-	$effect(() => render_page(currentPage));
+	function resolve_file_url(value: FileData): string {
+		if (!value.url) {
+			throw new Error("Uploaded file is missing a URL.");
+		}
+		if (value.url.startsWith("http://") || value.url.startsWith("https://")) {
+			return value.url;
+		}
+		const backend_port = (window as any).__GRADIO__SERVER_PORT__;
+		const root =
+			gradio.shared.root ||
+			(backend_port
+				? `${window.location.protocol}//${window.location.hostname}:${backend_port}/`
+				: window.location.origin + "/");
+		return new URL(value.url, root).href;
+	}
 
-	async function handle_clear() {
+	async function handle_clear(): Promise<void> {
 		gradio.props.value = null;
+		pdfDoc = null;
 		await tick();
 		gradio.dispatch("change");
 	}
 
-	async function handle_upload({detail}: CustomEvent<FileData>): Promise<void> {
+	async function handle_upload(
+		data: FileData | FileData[] | Blob | File
+	): Promise<void> {
+		const detail = Array.isArray(data) ? data[0] : (data as FileData);
 		gradio.props.value = detail;
 		await tick();
 		gradio.dispatch("upload");
 	}
 
-
-	async function get_doc(value: FileData) {
-		const loadingTask = pdfjsLib.getDocument({
-			url: value.url,
-			cMapUrl: "https://huggingface.co/datasets/freddyaboulton/bucket/resolve/main/cmaps/",
-			cMapPacked: true,
-		});
-		pdfDoc = await loadingTask.promise;
-		numPages = pdfDoc.numPages;
-		currentPage = Math.min(Math.max(gradio.props.starting_page, 1), numPages)
-		render_page(currentPage);
-	}
-
-	function render_page(currentPage) {
-		if(!pdfDoc) return;
-		// Render a specific page of the PDF onto the canvas
-		pdfDoc.getPage(currentPage).then(page => {
-			const ctx  = canvasRef.getContext('2d')
-			ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
-			let viewport = page.getViewport({ scale: 1 });
-			if (gradio.props.height) {
-				viewport = page.getViewport({ scale: gradio.props.height / viewport.height });
+	async function get_doc(value: FileData): Promise<void> {
+		await tick();
+		try {
+			const url = resolve_file_url(value);
+			const response = await fetch(url, { credentials: "include" });
+			if (!response.ok) {
+				throw new Error(`Failed to fetch PDF (${response.status})`);
 			}
-			const renderContext = {
-				canvasContext: ctx,
-				viewport,
-			};
-			canvasRef.width = viewport.width;
-			canvasRef.height = viewport.height;
-			page.render(renderContext);
-		});
-	}
-
-	function next_page() {
-		if (currentPage >= numPages) {
-			return;
+			const data = await response.arrayBuffer();
+			const loadingTask = pdfjsLib.getDocument({
+				data,
+				cMapUrl:
+					"https://huggingface.co/datasets/freddyaboulton/bucket/resolve/main/cmaps/",
+				cMapPacked: true,
+			});
+			pdfDoc = await loadingTask.promise;
+			numPages = pdfDoc.numPages;
+			await tick();
+			await go_to_page(
+				Math.min(
+					Math.max(gradio.props.starting_page ?? 1, 1),
+					numPages
+				)
+			);
+		} catch (error) {
+			console.error("Failed to load PDF:", error);
+			gradio.dispatch("error", String(error));
 		}
-		currentPage++;
 	}
 
-	function prev_page() {
-		if (currentPage == 1) {
-			return;
+	async function render_page(pageNum: number): Promise<void> {
+		if (!pdfDoc || !canvasRef) return;
+
+		const pageIndex = Math.min(Math.max(Math.floor(pageNum), 1), numPages);
+		const doc = pdfDoc;
+		const canvas = canvasRef;
+
+		if (renderTask) {
+			try {
+				renderTask.cancel();
+			} catch {
+				// ignore cancelled render
+			}
+			renderTask = null;
 		}
-		currentPage--;
+
+		const page = await doc.getPage(pageIndex);
+		if (!canvasRef) return;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		let viewport = page.getViewport({ scale: 1 });
+		if (gradio.props.height) {
+			viewport = page.getViewport({
+				scale: gradio.props.height / viewport.height,
+			});
+		}
+		canvas.width = viewport.width;
+		canvas.height = viewport.height;
+		renderTask = page.render({ canvasContext: ctx, viewport });
+		try {
+			await renderTask.promise;
+		} catch (error) {
+			if ((error as { name?: string }).name === "RenderingCancelledException") {
+				return;
+			}
+			throw error;
+		} finally {
+			renderTask = null;
+		}
 	}
 
-	function handle_page_change() {
-		if(currentPage < 1) return;
-		if(currentPage > numPages) return;
+	async function go_to_page(pageNum: number): Promise<void> {
+		if (!pdfDoc) return;
+		currentPage = Math.min(Math.max(Math.floor(pageNum), 1), numPages);
+		await render_page(currentPage);
 	}
 
-	function num_digits(x) {
+	function next_page(): void {
+		if (currentPage >= numPages) return;
+		void go_to_page(currentPage + 1);
+	}
+
+	function prev_page(): void {
+		if (currentPage <= 1) return;
+		void go_to_page(currentPage - 1);
+	}
+
+	function handle_page_change(): void {
+		void go_to_page(currentPage);
+	}
+
+	function handle_page_keydown(event: KeyboardEvent): void {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			void go_to_page(currentPage);
+		}
+	}
+
+	function num_digits(x: number): number {
 		return (Math.log10((x ^ (x >> 31)) - (x >> 31)) | 0) + 1;
 	}
 
-	// Compute the url to fetch the file from the backend\
-	// whenever a new value is passed in.
-	let _value = $derived(gradio.props.value);
-
-	// If the value changes, render the PDF of the currentPage
-	$effect(() => {
-	if(JSON.stringify(old_value) != JSON.stringify(_value)) {
-		if (_value){
-			get_doc(_value);
-		}
-		old_value = _value;
-		gradio.dispatch("change");
-	}
-	});
+	const client = gradio.shared.client;
 </script>
 
 <Block
 	visible={gradio.shared.visible}
- 	elem_id={gradio.shared.elem_id}
- 	elem_classes={gradio.shared.elem_classes}
+	elem_id={gradio.shared.elem_id}
+	elem_classes={gradio.shared.elem_classes}
 	container={gradio.shared.container}
 	scale={gradio.shared.scale}
 	min_width={gradio.shared.min_width}
@@ -135,38 +220,77 @@
 		label={gradio.shared.label || "File"}
 	/>
 	{#if _value}
-		<ModifyUpload i18n={gradio.i18n} on:clear={handle_clear} />
+		<ModifyUpload i18n={gradio.i18n} onclear={handle_clear} />
 		<div class="pdf-canvas">
 			<canvas bind:this={canvasRef}></canvas>
 		</div>
 		<div class="button-row">
-			<BaseButton on:click={prev_page}>
+			<BaseButton
+				elem_id={null}
+				elem_classes={[]}
+				visible={true}
+				variant="secondary"
+				size="sm"
+				value={null}
+				link={null}
+				link_target="_self"
+				icon={null}
+				disabled={currentPage <= 1}
+				scale={null}
+				min_width={undefined}
+				onclick={prev_page}
+			>
 				⬅️
 			</BaseButton>
 			<div class="page-count">
-				<input type="number" style={`width: ${50 + num_digits(numPages) * 10}px`} bind:value={currentPage} on:change={handle_page_change} min={1} max={numPages}  />
-				<span style="padding: var(--size-1)"> / </span> 
+				<input
+					type="number"
+					style={`width: ${50 + num_digits(numPages) * 10}px`}
+					bind:value={currentPage}
+					onchange={handle_page_change}
+					onkeydown={handle_page_keydown}
+					min={1}
+					max={numPages}
+				/>
+				<span style="padding: var(--size-1)"> / </span>
 				<span style="padding-right: var(--size-2); width: fit-content">{numPages}</span>
 			</div>
-			<BaseButton on:click={next_page}>
+			<BaseButton
+				elem_id={null}
+				elem_classes={[]}
+				visible={true}
+				variant="secondary"
+				size="sm"
+				value={null}
+				link={null}
+				link_target="_self"
+				icon={null}
+				disabled={currentPage >= numPages}
+				scale={null}
+				min_width={undefined}
+				onclick={next_page}
+			>
 				➡️
 			</BaseButton>
 		</div>
 	{:else if gradio.shared.interactive}
 		<Upload
-			on:load={handle_upload}
-			on:error={({ detail }) => {
-				loading_status = loading_status || {};
-				loading_status.status = "error";
-				gradio.dispatch("error", detail);
+			onload={handle_upload}
+			onerror={(error) => {
+				if (gradio.shared.loading_status) {
+					gradio.shared.loading_status.status = "error";
+				}
+				gradio.dispatch("error", error);
 			}}
-			filetype={".pdf"}
+			filetype=".pdf"
 			file_count="single"
-			max_file_size={gradio.max_file_size}
-			upload={gradio.client.upload}
-			stream_handler={gradio.client.stream}
+			show_progress={false}
+			max_file_size={gradio.shared.max_file_size}
+			root={gradio.shared.root}
+			upload={client.upload.bind(client)}
+			stream_handler={client.stream.bind(client)}
 		>
-			<PdfUploadText/>
+			<PdfUploadText />
 		</Upload>
 	{:else}
 		<Empty unpadded_box={true} size="large"><File /></Empty>
@@ -221,5 +345,4 @@
 	input::placeholder {
 		color: var(--input-placeholder-color);
 	}
-
 </style>

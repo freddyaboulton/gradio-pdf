@@ -7,13 +7,13 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "gradio_pdf"
-version = "0.0.23"
-description = "Easily display PDFs in Gradio"
+name = "gradio_pdf_redaction"
+version = "0.0.25"
+description = "Easily display PDFs in Gradio. Forked from Freddy Boulton's gradio_pdf repo."
 readme = "README.md"
-license = "Apache-2.0"
-requires-python = ">=3.8"
-authors = [{ name = "Freddy Boulton", email = "alfonsoboulton@gmail.com" }]
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Sean Pedrick-Case", email = "spedrickcase@lambeth.gov.uk" }]
 keywords = [
   "Documents",
   "PDF",
@@ -30,10 +30,10 @@ classifiers = [
   'Operating System :: OS Independent',
   'Programming Language :: Python :: 3',
   'Programming Language :: Python :: 3 :: Only',
-  'Programming Language :: Python :: 3.8',
-  'Programming Language :: Python :: 3.9',
   'Programming Language :: Python :: 3.10',
   'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
   'Topic :: Scientific/Engineering',
   'Topic :: Scientific/Engineering :: Artificial Intelligence',
   'Topic :: Scientific/Engineering :: Visualization',
@@ -43,11 +43,11 @@ classifiers = [
 dev = ["build", "twine"]
 
 [project.urls]
-repository = "https://github.com/freddyaboulton/gradio-pdf"
-space = "https://huggingface.co/spaces/freddyaboulton/gradio_pdf"
+repository = "https://github.com/seanpedrick-case/gradio-pdf"
+space = "https://huggingface.co/spaces/seanpedrick-case/gradio_pdf"
 
 [tool.hatch.build]
-artifacts = ["/backend/gradio_pdf/templates", "*.pyi", "backend/gradio_pdf/templates", "backend/gradio_pdf/templates"]
+artifacts = ["/backend/gradio_pdf_redaction/templates", "*.pyi", "backend/gradio_pdf_redaction/templates", "backend/gradio_pdf_redaction/templates"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["/backend/gradio_pdf"]
+packages = ["/backend/gradio_pdf_redaction"]

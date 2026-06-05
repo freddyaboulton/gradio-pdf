@@ -1,41 +1,120 @@
 <script lang="ts">
-	export let value: object;
-	export let samples_dir: string;
-	export let type: "gallery" | "table";
-	export let selected = false;
-	import * as pdfjsLib from 'pdfjs-dist';
-	pdfjsLib.GlobalWorkerOptions.workerSrc =  "https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
-	
-	let pdfDoc;
-	let canvasRef;
+	import { tick } from "svelte";
+	import type { FileData } from "@gradio/client";
+	import * as pdfjsLib from "pdfjs-dist";
 
-	async function get_doc(url: string) {
-		const loadingTask = pdfjsLib.getDocument(url);
-		pdfDoc = await loadingTask.promise;
-		renderPage();
+	let {
+		value,
+		type,
+		selected = false,
+		root = "",
+	}: {
+		value: FileData;
+		type: "gallery" | "table";
+		selected?: boolean;
+		root?: string;
+	} = $props();
+
+	pdfjsLib.GlobalWorkerOptions.workerSrc =
+		"https://cdn.jsdelivr.net/gh/freddyaboulton/gradio-pdf@main/pdf.worker.min.mjs";
+
+	let pdfDoc = $state<pdfjsLib.PDFDocumentProxy | null>(null);
+	let canvasRef = $state<HTMLCanvasElement | null>(null);
+	let renderTask: pdfjsLib.RenderTask | null = null;
+
+	function resolve_file_url(file: FileData): string {
+		if (file.url) {
+			if (file.url.startsWith("http://") || file.url.startsWith("https://")) {
+				return file.url;
+			}
+			const backend_port = (window as any).__GRADIO__SERVER_PORT__;
+			const base =
+				root ||
+				(backend_port
+					? `${window.location.protocol}//${window.location.hostname}:${backend_port}/`
+					: window.location.origin + "/");
+			return new URL(file.url, base).href;
 		}
+		if (file.path) {
+			const backend_port = (window as any).__GRADIO__SERVER_PORT__;
+			const base =
+				root ||
+				(backend_port
+					? `${window.location.protocol}//${window.location.hostname}:${backend_port}/`
+					: window.location.origin + "/");
+			return new URL(`/file=${file.path}`, base).href;
+		}
+		throw new Error("Example file is missing url or path");
+	}
 
-	function renderPage() {
-		// Render a specific page of the PDF onto the canvas
-			pdfDoc.getPage(1).then(page => {
-				const ctx  = canvasRef.getContext('2d')
-				ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
-				
-				const viewport = page.getViewport({ scale: 0.2 });
-				
-				const renderContext = {
-					canvasContext: ctx,
-					viewport
-				};
-				canvasRef.width = viewport.width;
-				canvasRef.height = viewport.height;
-				page.render(renderContext);
+	async function load_pdf(file: FileData): Promise<void> {
+		await tick();
+		try {
+			const url = resolve_file_url(file);
+			const response = await fetch(url, { credentials: "include" });
+			if (!response.ok) {
+				throw new Error(`Failed to fetch PDF (${response.status})`);
+			}
+			const data = await response.arrayBuffer();
+			const loadingTask = pdfjsLib.getDocument({
+				data,
+				cMapUrl:
+					"https://huggingface.co/datasets/freddyaboulton/bucket/resolve/main/cmaps/",
+				cMapPacked: true,
 			});
+			pdfDoc = await loadingTask.promise;
+			await tick();
+			await render_page();
+		} catch (error) {
+			console.error("Failed to load example PDF:", error);
+			pdfDoc = null;
+		}
+	}
+
+	async function render_page(): Promise<void> {
+		if (!pdfDoc || !canvasRef) return;
+
+		const doc = pdfDoc;
+		const canvas = canvasRef;
+
+		if (renderTask) {
+			try {
+				renderTask.cancel();
+			} catch {
+				// ignore cancelled render
+			}
+			renderTask = null;
 		}
 
-	$: url = value.url;
+		const page = await doc.getPage(1);
+		if (!canvasRef) return;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
 
-	$: get_doc(url);
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		const viewport = page.getViewport({ scale: 0.2 });
+		canvas.width = viewport.width;
+		canvas.height = viewport.height;
+		renderTask = page.render({ canvasContext: ctx, viewport });
+		try {
+			await renderTask.promise;
+		} catch (error) {
+			if ((error as { name?: string }).name === "RenderingCancelledException") {
+				return;
+			}
+			throw error;
+		} finally {
+			renderTask = null;
+		}
+	}
+
+	$effect(() => {
+		if (value?.url || value?.path) {
+			void load_pdf(value);
+		} else {
+			pdfDoc = null;
+		}
+	});
 </script>
 
 <div

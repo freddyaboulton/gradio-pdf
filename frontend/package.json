@@ -17,21 +17,19 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@gradio/preview": "0.15.1",
+    "@gradio/preview": "0.16.2",
+    "svelte": "^5.48.0",
     "vite": "^7.2.4"
   },
-  "peerDependencies": {
-    "svelte": "^5.43.4"
-  },
   "dependencies": {
-    "@gradio/atoms": "^0.19.0",
-    "@gradio/button": "0.5.14",
-    "@gradio/client": "2.0.0",
-    "@gradio/icons": "0.15.0",
+    "@gradio/atoms": "^0.22.2",
+    "@gradio/button": "^0.6.5",
+    "@gradio/client": "^2.1.0",
+    "@gradio/icons": "^0.15.1",
     "@gradio/markdown": "^0.13.23",
-    "@gradio/statustracker": "^0.12.0",
-    "@gradio/upload": "^0.17.2",
-    "@gradio/utils": "^0.10.4",
+    "@gradio/statustracker": "^0.12.5",
+    "@gradio/upload": "^0.17.7",
+    "@gradio/utils": "^0.12.0",
     "pdfjs-dist": "4.2.67"
   }
 }

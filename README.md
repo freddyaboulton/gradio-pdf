@@ -1,16 +1,13 @@
-<h1 style='text-align: center; margin-bottom: 1rem'> Gradio PDF 📕 </h1>
 
-<div style="display: flex; flex-direction: row; justify-content: center">
-<img style="display: block; padding-right: 5px; height: 20px;" alt="Static Badge" src="https://img.shields.io/pypi/v/gradio_pdf"> 
-<a href="https://github.com/freddyaboulton/gradio-pdf" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/github-white?logo=github&logoColor=black"></a>
-</div>
+# `gradio_pdf_redaction`
+<img alt="Static Badge" src="https://img.shields.io/badge/version%20-%200.0.25%20-%20orange"> <a href="https://github.com/seanpedrick-case/gradio-pdf/issues" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Issues-white?logo=github&logoColor=black"></a> <a href="https://huggingface.co/spaces/seanpedrick-case/gradio_pdf/discussions" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/%F0%9F%A4%97%20Discuss-%23097EFF?style=flat&logoColor=black"></a>
 
-Easily display PDFs in Gradio
+Easily display PDFs in Gradio. Forked from Freddy Boulton's gradio_pdf repo.
 
 ## Installation
 
 ```bash
-pip install gradio_pdf
+pip install gradio_pdf_redaction
 ```
 
 ## Usage
@@ -18,7 +15,7 @@ pip install gradio_pdf
 ```python
 
 import gradio as gr
-from gradio_pdf import PDF
+from gradio_pdf_redaction import PDF
 from pdf2image import convert_from_path
 from transformers import pipeline
 from pathlib import Path
@@ -36,18 +33,29 @@ def qa(question: str, doc: str) -> str:
     return sorted(output, key=lambda x: x["score"], reverse=True)[0]['answer']
 
 
-demo = gr.Interface(
-    qa,
-    [gr.Textbox(label="Question"), PDF(label="Document")],
-    gr.Textbox(),
-    examples=[["What is the total gross worth?", str(dir_ / "invoice_2.pdf")],
-              ["Whos is being invoiced?", str(dir_ / "sample_invoice.pdf")]]
-)
+EXAMPLES = [
+    ["What is the total gross worth?", str(dir_ / "invoice_2.pdf")],
+    ["Whos is being invoiced?", str(dir_ / "sample_invoice.pdf")],
+]
+
+
+def create_demo():
+    return gr.Interface(
+        qa,
+        [gr.Textbox(label="Question"), PDF(label="Document")],
+        gr.Textbox(),
+        examples=EXAMPLES,
+        cache_examples=False,
+    )
+
+
+# Required for `gradio cc dev` hot reload — must be a module-level Blocks/Interface.
+demo = create_demo()
 
 if __name__ == "__main__":
     demo.launch()
-```
 
+```
 
 ## `PDF`
 
@@ -68,7 +76,7 @@ if __name__ == "__main__":
 <td align="left" style="width: 25%;">
 
 ```python
-Any
+typing.Any
 ```
 
 </td>
@@ -237,7 +245,10 @@ bool
 <td align="left" style="width: 25%;">
 
 ```python
-Callable[Ellipsis, Any] | None
+typing.Optional[typing.Callable[..., typing.Any]][
+    typing.Callable[..., typing.Any][Ellipsis, typing.Any],
+    None,
+]
 ```
 
 </td>
